@@ -1,2 +1,2 @@
-pub const mem = @import("allocator.zig");
+pub const mem = @import("mem.zig");
 pub const Vector = @import("vector.zig").Vector;
