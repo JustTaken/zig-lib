@@ -116,3 +116,8 @@ pub fn Vector(T: type) type {
         }
     };
 }
+
+test "Vector init" {
+    var arena = try mem.Arena.new("Test", 1);
+    _ = try Vector(u32).new(10, &arena);
+}

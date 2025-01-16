@@ -72,9 +72,7 @@ pub fn alignWith(value: usize, with: usize) u32 {
 pub const Arena = struct {
     ptr: *anyopaque,
     usage: u32,
-    max_usage: u32,
     capacity: u32,
-    name: [:0]const u8,
 
     parent: ?*Arena,
 
@@ -85,24 +83,19 @@ pub const Arena = struct {
             .ptr = buffer.ptr,
             .capacity = @intCast(buffer.len),
             .usage = 0,
-            .max_usage = 0,
             .parent = null,
-            .name = name,
         };
     }
 
-    pub fn child(self: *Arena, name: [:0]const u8, size: u32) error{OutOfMemory}!*Arena {
+    pub fn child(self: *Arena, size: u32) error{OutOfMemory}!*Arena {
         var arena = Arena{
             .ptr = try self.alloc(u8, size),
             .capacity = size,
             .parent = self,
-            .max_usage = 0,
             .usage = 0,
-            .name = name,
         };
 
-        errdefer self.destroy(u8, size);
-
+        errdefer arena.deinit();
         return try arena.create(Arena, arena);
     }
 
@@ -123,17 +116,12 @@ pub const Arena = struct {
         return ptr;
     }
 
-    pub fn create(self: *Arena, T: type, value: T) error{OutOfMemory}!*T {
-        const ptr = try self.alloc(T, 1);
-
-        ptr[0] = value;
-
-        return @ptrCast(ptr);
+    pub fn create(self: *Arena, T: type) error{OutOfMemory}!*T {
+        return @ptrCast(try self.alloc(T, 1));
     }
 
     pub fn deinit(self: *Arena) void {
         if (self.parent) |arena| {
-            self.destroy(Arena, 1);
             arena.destroy(u8, self.capacity);
         } else {
             const buffer: [*]u8 = @ptrCast(self.ptr);
@@ -141,3 +129,6 @@ pub const Arena = struct {
         }
     }
 };
+
+test "Arena init" {
+}
