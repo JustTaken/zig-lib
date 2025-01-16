@@ -76,7 +76,7 @@ pub const Arena = struct {
 
     parent: ?*Arena,
 
-    pub fn new(name: [:0]const u8, pages: u32) error{OutOfMemory}!Arena {
+    pub fn new(pages: u32) error{OutOfMemory}!Arena {
         const buffer = mAlloc(pages) catch return error.OutOfMemory;
 
         return .{
@@ -121,12 +121,12 @@ pub const Arena = struct {
     }
 
     pub fn deinit(self: *Arena) void {
-        if (self.parent) |arena| {
-            arena.destroy(u8, self.capacity);
-        } else {
+        if (self.parent) |_| {} else {
             const buffer: [*]u8 = @ptrCast(self.ptr);
             mFree(buffer[0..self.capacity]);
         }
+
+        self.capacity = 0;
     }
 };
 

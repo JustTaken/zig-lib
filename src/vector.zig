@@ -106,18 +106,19 @@ pub fn Vector(T: type) type {
             self.len = 0;
         }
 
-        pub fn deinit(self: *Self, arena: *mem.Arena) void {
+        pub fn deinit(self: *Self) void {
             defer {
                 self.clear();
                 self.capacity = 0;
             }
-
-            arena.destroy(T, self.capacity);
         }
     };
 }
 
 test "Vector init" {
-    var arena = try mem.Arena.new("Test", 1);
-    _ = try Vector(u32).new(10, &arena);
+    var arena = try mem.Arena.new(1);
+    defer arena.deinit();
+
+    var vector = try Vector(u32).new(10, &arena);
+    defer vector.deinit();
 }
